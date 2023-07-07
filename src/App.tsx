@@ -1,11 +1,15 @@
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 
 import { useEffect, useState } from 'react';
 import { useDebounce } from './hooks/debounce';
+import { OptionType } from './types';
 
 const App = () => {
   const [term, setTerm] = useState<string>('');
+  const [options, setOptions] = useState<OptionType[]>([]);
+  const [city, setCity] = useState<OptionType | null>(null);
   const debounced = useDebounce(term);
 
   const getSearchOptions = (value: string) => {
@@ -15,8 +19,8 @@ const App = () => {
       }`
     )
       .then(res => res.json())
-      .then(data => {
-        console.log(data);
+      .then((data: OptionType[]) => {
+        setOptions(data);
       })
       .catch(error => {
         console.log(error);
@@ -31,9 +35,40 @@ const App = () => {
 
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.trim();
-    if (value === '') return;
     setTerm(value);
+    if (value === '') return;
   };
+
+  const getForecast = (city: OptionType) => {
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${
+        city.lon
+      }&units=metric&appid=${import.meta.env.VITE_API_KEY}`
+    )
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+      });
+  };
+
+  const onSubmit = () => {
+    if (!city) {
+      return;
+    } else {
+      getForecast(city);
+    }
+  };
+
+  const onOptionSelect = (option: OptionType) => {
+    setCity(option);
+  };
+
+  useEffect(() => {
+    if (city) {
+      setTerm(city.name);
+      setOptions([]);
+    }
+  }, [city]);
 
   return (
     <main className="flex justify-center items-center bg-gradient-to-br from-sky-400 to-lime-400 h-[100vh] w-full">
@@ -47,14 +82,33 @@ const App = () => {
           option from dropdown
         </p>
 
-        <div className="flex mt-10 md:mt-4">
+        <div className="relative flex mt-10 md:mt-4">
           <input
             type="text"
             value={term}
             className="px-2 py-1 rounded-l-md border-2 border-white"
             onChange={onInputChange}
           />
-          <button className="rounded-r-md border-2 border-zinc-100 hover:border-zinc-500 hover:text-zinc-500  text-zinc-100 px-2 py-1 cursor-pointer">
+
+          <ul className="absolute top-9 bg-white ml-1 rounded-b-md">
+            {options.map((option: OptionType, index: number) => (
+              <li key={option.name + '-' + index}>
+                <button
+                  className="text-left text-sm w-full hover:bg-zinc-700 hover:text-white px-2 py-1 cursor-pointer"
+                  onClick={() => {
+                    onOptionSelect(option);
+                  }}
+                >
+                  {option.name}, {option.country}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            className="rounded-r-md border-2 border-zinc-100 hover:border-zinc-500 hover:text-zinc-500  text-zinc-100 px-2 py-1 cursor-pointer"
+            onClick={onSubmit}
+          >
             search
           </button>
         </div>
