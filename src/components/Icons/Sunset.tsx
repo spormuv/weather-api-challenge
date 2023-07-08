@@ -1,4 +1,4 @@
-const Sunset = (): React.JSX.Element => (
+const Sunset = () => (
   <svg
     width="20"
     height="20"

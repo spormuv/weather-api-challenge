@@ -1,4 +1,4 @@
-const Visibility = (): React.JSX.Element => (
+const Visibility = () => (
   <svg
     width="15"
     height="15"

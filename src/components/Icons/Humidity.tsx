@@ -1,4 +1,4 @@
-const aTest = (): React.JSX.Element => (
+const aTest = () => (
   <svg
     width="15"
     height="15"

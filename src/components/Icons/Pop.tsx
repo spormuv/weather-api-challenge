@@ -1,4 +1,4 @@
-const Pop = (): React.JSX.Element => (
+const Pop = () => (
   <svg
     width="15"
     height="12"
